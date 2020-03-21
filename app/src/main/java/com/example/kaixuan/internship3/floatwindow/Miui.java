@@ -14,7 +14,6 @@ import java.util.List;
 import static  com.example.kaixuan.internship3.floatwindow.Rom.isIntentAvailable;
 
 /**
- * https://github.com/yhaolpz
  * <p>
  * 需要清楚：一个MIUI版本对应小米各种机型，基于不同的安卓版本，但是权限设置页跟MIUI版本有关
  * 测试TYPE_TOAST类型：
@@ -102,16 +101,6 @@ class Miui {
                 reqForMiui89(context);
                 break;
         }
-//        FloatLifecycle.setResumedListener(new ResumedListener() {
-//            @Override
-//            public void onResumed() {
-//                if (PermissionUtil.hasPermission(context)) {
-//                    mPermissionListener.onSuccess();
-//                } else {
-//                    mPermissionListener.onFail();
-//                }
-//            }
-//        });
     }
 
 

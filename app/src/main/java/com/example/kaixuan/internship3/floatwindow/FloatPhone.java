@@ -36,20 +36,6 @@ public class FloatPhone extends FloatView {
 
     }
 
-    /**
-     * 屏幕大小改变：横竖屏
-     *
-     * @param context
-     */
-    public static void onScreenSizeChange(Context context, Point screenSize) {
-        mPointScreenSize = screenSize;
-//        mDefaultBtnSize = DensityUtil.dp2px(context, 58);
-//        mDefaultTopSize = StatusBarUtil.getStatusBarHeight(context);
-//        int bottom = StatusBarBottomUtil.getBottomStatusHeight(context);
-//        if (bottom > 0) {
-//            mDefaultBottomSize = bottom;
-//        }
-    }
 
     @Override
     public void setSize(int width, int height) {
