@@ -1,7 +1,9 @@
 package com.example.kaixuan.internship3.floatwindow;
 
 import android.animation.TimeInterpolator;
+import android.app.Activity;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
@@ -140,6 +142,34 @@ public class FloatWindow {
             return this;
         }
 
+        // 为解决横竖屏切换问题
+        public B setX(@Screen.screenType int screenType, boolean is_portrait, float ratio) {
+            if(is_portrait){
+                xOffset = (int) ((screenType == Screen.width ?
+                        Util.getScreenWidth(mApplicationContext) :
+                        Util.getScreenHeight(mApplicationContext)) * ratio);
+            }else{
+                xOffset = (int) ((screenType == Screen.height ?
+                        Util.getScreenWidth(mApplicationContext) :
+                        Util.getScreenHeight(mApplicationContext)) * ratio);
+            }
+
+            return this;
+        }
+
+        public B setY(@Screen.screenType int screenType, boolean is_portrait, float ratio) {
+            if(is_portrait){
+            yOffset = (int) ((screenType == Screen.width ?
+                    Util.getScreenWidth(mApplicationContext) :
+                    Util.getScreenHeight(mApplicationContext)) * ratio);
+            }else{
+                yOffset = (int) ((screenType == Screen.height ?
+                        Util.getScreenWidth(mApplicationContext) :
+                        Util.getScreenHeight(mApplicationContext)) * ratio);
+            }
+            return this;
+        }
+        //-------------------------
 
         /**
          * 设置 Activity 过滤器，用于指定在哪些界面显示悬浮窗，默认全部界面都显示
