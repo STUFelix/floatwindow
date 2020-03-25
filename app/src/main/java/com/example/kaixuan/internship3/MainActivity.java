@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
                 case R.id.btn_change_view:
                     IS_PORTRAIT=false;
-                    changeView(IS_PORTRAIT);
+                    changeView(IS_BACK);
                     break;
             default:
                 break;
@@ -226,7 +226,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     };
 
-    private void changeView(boolean IS_BACK){
+    private void changeView(boolean mIS_BACK){
         if (FloatWindow.get() != null ) {
             IFloatWindow mIFloatWindow = FloatWindow.B.getFloatWindowImpl();
             Point point = ScreenUtil.getCurScreenSize(getApplication());
@@ -236,7 +236,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             //但如果是按BACK键 又不一样 比如在竖屏下按back键 pointx ponty 是没有变换的 横屏下也是没有变换的，特别注意
             double XP,YP;
             int newX,newY;
-            if(!IS_BACK) {
+            if(!mIS_BACK) {
                  XP = mIFloatWindow.getX() * 1.0 / point.y;
                  YP = mIFloatWindow.getY() * 1.0 / point.x;
                  newX = (int) (point.x * XP);
@@ -247,6 +247,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 newX = (int) (point.y * XP);
                 newY = (int) (point.x * YP);
             }
+            IS_BACK=false;
+
 
             Log.e("testXY", "point.x" + point.x + " point.y" + point.y + " mIFloatWindow.getX()" + mIFloatWindow.getX()
                     + " mIFloatWindow.getY()" + mIFloatWindow.getY() + " XP" + XP + " YP" + YP + " newX" + newX + " newY" + newY);
@@ -254,7 +256,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     "\nX的比例："+XP+"\nY的比例："+YP
                     +"\n按比例得到： newX:" + newX + " newY:" + newY, Toast.LENGTH_SHORT).show();
             mIFloatWindow.updateXY(newX, newY, MoveType.active);
-            IS_BACK = false;
         }else{
             Toast.makeText(this, "请先开始悬浮窗", Toast.LENGTH_SHORT).show();
         }
@@ -269,13 +270,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             //切换横屏
             IS_PORTRAIT = false;
 //            openFloatWindow(IS_PORTRAIT,IS_OPEN);
-            changeView(IS_PORTRAIT);
+            changeView(IS_BACK);
 
         }else{
             //切换竖屏
             IS_PORTRAIT = true;
 //            openFloatWindow(IS_PORTRAIT,IS_OPEN);
-            changeView(IS_PORTRAIT);
+            changeView(IS_BACK);
 
         }
     }
