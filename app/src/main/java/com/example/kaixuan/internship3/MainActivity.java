@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.os.Build;
@@ -20,9 +21,11 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.kaixuan.internship3.floatwindow.FloatWindow;
+import com.example.kaixuan.internship3.floatwindow.IFloatWindow;
 import com.example.kaixuan.internship3.floatwindow.MoveType;
 import com.example.kaixuan.internship3.floatwindow.PermissionListener;
 import com.example.kaixuan.internship3.floatwindow.Screen;
+import com.example.kaixuan.internship3.floatwindow.ScreenUtil;
 import com.example.kaixuan.internship3.permission.FloatWindowManager;
 import com.example.kaixuan.internship3.recordingscreen.ScreenRecorder;
 
@@ -31,13 +34,19 @@ import java.io.File;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static boolean IS_PORTRAIT = true;
+
     private static boolean IS_OPEN = false;
     private static boolean IS_CLOSE = true;
+    private static boolean IS_BACK = false;
 
     private static final int REQUEST_CODE = 1;
     private MediaProjectionManager mMediaProjectionManager;
     private ScreenRecorder mRecorder;
     private Button mButton;
+
+//    private  WindowManager mWindowManager;
+//    private  WindowManager.LayoutParams mLayoutParams;
+    private FloatView floatView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,12 +57,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.btn_open_float_window).setOnClickListener(this);
         findViewById(R.id.btn_close_float_window).setOnClickListener(this);
         findViewById(R.id.btn_change_orientation).setOnClickListener(this);
+        findViewById(R.id.btn_change_view).setOnClickListener(this);
 
+        //录屏
         mButton = (Button) findViewById(R.id.btn_start_recorder);
         mButton.setOnClickListener(this);
         mMediaProjectionManager = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
-
         mGetExternalStoragePermission();
+
+        floatView = new FloatView(this);
     }
 
 
@@ -89,6 +101,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     startActivityForResult(captureIntent, REQUEST_CODE);
                 }
                 break;
+                case R.id.btn_change_view:
+                    IS_PORTRAIT=false;
+                    changeView(IS_PORTRAIT);
+                    break;
             default:
                 break;
         }
@@ -108,15 +124,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //开启悬浮窗
     private void openFloatWindow(boolean IS_PORTRAIT,boolean IS_OPEN) {
         if (FloatWindowManager.getInstance().checkPermission(getApplicationContext())) {
-            if (FloatWindow.get() == null&& IS_OPEN ) {
-                FloatView floatView = new FloatView(this);
-
+            if (FloatWindow.get() == null && IS_OPEN ) {
+                // FloatView floatView = new FloatView(this);
                 //建造者模式
                 FloatWindow
                         .with(getApplication())
                         .setView(floatView)
-                        .setX(Screen.width, IS_PORTRAIT,0.5f)
-                        .setY(Screen.height, IS_PORTRAIT,0.5f)
+                        .setX(Screen.width, IS_PORTRAIT,0.0f)
+                        .setY(Screen.height, IS_PORTRAIT,0.3f)
+                        //.setX(Screen.width,0.0f)
+                        //.setY(Screen.height,0.3f)
                         .setMoveType(MoveType.active, 0, 0)
                         .setMoveStyle(500, new BounceInterpolator())
                         .setFilter(true, MainActivity.class)//设置MainActivity.class显示悬浮窗true
@@ -147,33 +164,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             MainActivity.this. setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
             Toast.makeText(MainActivity.this, "横屏", Toast.LENGTH_SHORT).show();
         }
-    }
-
-    //监听横竖屏切换，调整悬浮框的位置
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        closeFloatWindow(IS_CLOSE);
-        if(newConfig.orientation==Configuration.ORIENTATION_LANDSCAPE){
-            //切换横屏
-            IS_PORTRAIT = false;
-            openFloatWindow(IS_PORTRAIT,IS_OPEN);
-        }else{
-            //切换竖屏
-            IS_PORTRAIT = true;
-            openFloatWindow(IS_PORTRAIT,IS_OPEN);
-        }
-    }
-
-    // 监听back键导致的横竖屏变换
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event){
-        if(keyCode == KeyEvent.KEYCODE_BACK  ){
-            closeFloatWindow(IS_CLOSE);
-            IS_PORTRAIT = true;
-            openFloatWindow(IS_PORTRAIT,IS_OPEN);
-        }
-        return super.onKeyDown(keyCode,event);
     }
 
 
@@ -235,5 +225,75 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         }
     };
+
+    private void changeView(boolean IS_BACK){
+        if (FloatWindow.get() != null ) {
+            IFloatWindow mIFloatWindow = FloatWindow.B.getFloatWindowImpl();
+            Point point = ScreenUtil.getCurScreenSize(getApplication());
+
+            // point x y 会根据横竖屏变换 mIFloatWindow.getX()和getY()也是；
+            // 但是变换的顺序不一样，mIFloatWindow为旧 point为新
+            //但如果是按BACK键 又不一样 比如在竖屏下按back键 pointx ponty 是没有变换的 横屏下也是没有变换的，特别注意
+            double XP,YP;
+            int newX,newY;
+            if(!IS_BACK) {
+                 XP = mIFloatWindow.getX() * 1.0 / point.y;
+                 YP = mIFloatWindow.getY() * 1.0 / point.x;
+                 newX = (int) (point.x * XP);
+                 newY = (int) (point.y * YP);
+            }else {
+                XP = mIFloatWindow.getX() * 1.0 / point.x;
+                YP = mIFloatWindow.getY() * 1.0 / point.y;
+                newX = (int) (point.y * XP);
+                newY = (int) (point.x * YP);
+            }
+
+            Log.e("testXY", "point.x" + point.x + " point.y" + point.y + " mIFloatWindow.getX()" + mIFloatWindow.getX()
+                    + " mIFloatWindow.getY()" + mIFloatWindow.getY() + " XP" + XP + " YP" + YP + " newX" + newX + " newY" + newY);
+            Toast.makeText(this, "oldX:" + mIFloatWindow.getX() + " oldY:" + mIFloatWindow.getY() +
+                    "\nX的比例："+XP+"\nY的比例："+YP
+                    +"\n按比例得到： newX:" + newX + " newY:" + newY, Toast.LENGTH_SHORT).show();
+            mIFloatWindow.updateXY(newX, newY, MoveType.active);
+            IS_BACK = false;
+        }else{
+            Toast.makeText(this, "请先开始悬浮窗", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    //监听横竖屏切换，调整悬浮框的位置
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+//        closeFloatWindow(IS_CLOSE);
+        if(newConfig.orientation==Configuration.ORIENTATION_LANDSCAPE){
+            //切换横屏
+            IS_PORTRAIT = false;
+//            openFloatWindow(IS_PORTRAIT,IS_OPEN);
+            changeView(IS_PORTRAIT);
+
+        }else{
+            //切换竖屏
+            IS_PORTRAIT = true;
+//            openFloatWindow(IS_PORTRAIT,IS_OPEN);
+            changeView(IS_PORTRAIT);
+
+        }
+    }
+
+    // 监听back键导致的横竖屏变换
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event){
+        if(keyCode == KeyEvent.KEYCODE_BACK  ){
+//            closeFloatWindow(IS_CLOSE);
+//            IS_PORTRAIT = true;
+//            openFloatWindow(IS_PORTRAIT,IS_OPEN);
+            if(!IS_PORTRAIT) {
+                IS_BACK=true;
+                changeView(IS_BACK);
+                IS_PORTRAIT=true;
+            }
+        }
+        return super.onKeyDown(keyCode,event);
+    }
 
 }

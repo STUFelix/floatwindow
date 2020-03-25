@@ -67,5 +67,14 @@
         android:paddingHorizontal="10dp"
         android:text="5 开始录制" />
 
+    <Button
+        android:id="@+id/btn_change_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:background="#f5f5f5"
+        android:gravity="center"
+        android:paddingHorizontal="10dp"
+        android:text="6 横竖屏切换时悬浮窗位置变换测试按钮" />
 
 </LinearLayout>

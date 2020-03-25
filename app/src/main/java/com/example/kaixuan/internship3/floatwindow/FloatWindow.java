@@ -1,9 +1,7 @@
 package com.example.kaixuan.internship3.floatwindow;
 
 import android.animation.TimeInterpolator;
-import android.app.Activity;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
@@ -72,6 +70,7 @@ public class FloatWindow {
         TimeInterpolator mInterpolator;
         private String mTag = mDefaultTag;
         boolean mDesktopShow;
+        public static IFloatWindow floatWindowImpl;
         PermissionListener mPermissionListener;
 
         private B() {
@@ -237,8 +236,15 @@ public class FloatWindow {
             if (mView == null) {
                 mView = Util.inflate(mApplicationContext, mLayoutId);
             }
-            IFloatWindow floatWindowImpl = new IFloatWindowImpl(this);
+//            IFloatWindow floatWindowImpl = new IFloatWindowImpl(this);
+             floatWindowImpl = new IFloatWindowImpl(this);
+
             mFloatWindowMap.put(mTag, floatWindowImpl);
+
+        }
+
+        public static IFloatWindow getFloatWindowImpl(){
+            return floatWindowImpl;
         }
 
     }
